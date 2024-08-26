@@ -78,3 +78,20 @@ resource "aws_iam_role_policy_attachment" "lambda_policy_attachment" {
 resource "aws_sqs_queue" "my_queue" {
   name = "my-queue"
 }
+
+//Lambda function
+resource "aws_lambda_function" "my_lambda" {
+  filename         = "lambda_function.zip"
+  function_name    = "my_lambda_function"
+  role             = aws_iam_role.lambda_role.arn
+  handler          = "index.handler"
+  runtime          = "nodejs20.x"
+  source_code_hash = filebase64sha256("lambda_function.zip")  # Ensures Lambda updates when the code changes
+
+  environment {
+    variables = {
+      TABLE_NAME = aws_dynamodb_table.my_table.name
+    }
+  }
+}
+
