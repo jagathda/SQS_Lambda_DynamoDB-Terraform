@@ -95,3 +95,41 @@ resource "aws_lambda_function" "my_lambda" {
   }
 }
 
+/*
+//Lambda event source mapping
+resource "aws_lambda_event_source_mapping" "sqs_to_lambda" {
+  event_source_arn = aws_sqs_queue.my_queue.arn
+  function_name    = aws_lambda_function.my_lambda.arn
+  enabled          = true
+}*/
+
+//SQS permission to IAM policy
+resource "aws_iam_policy" "lambda_sqs_dynamodb_policy" {
+  name        = "LambdaSQSDynamoDBAccessPolicy"
+  description = "Policy allowing Lambda to access SQS and DynamoDB"
+  policy      = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect = "Allow",
+        Action = [
+          "dynamodb:PutItem",
+          "dynamodb:GetItem",
+          "dynamodb:UpdateItem",
+          "dynamodb:Query",
+          "dynamodb:Scan"
+        ],
+        Resource = aws_dynamodb_table.my_table.arn
+      },
+      {
+        Effect = "Allow",
+        Action = [
+          "sqs:ReceiveMessage",
+          "sqs:DeleteMessage",
+          "sqs:GetQueueAttributes"
+        ],
+        Resource = aws_sqs_queue.my_queue.arn
+      }
+    ]
+  })
+}
