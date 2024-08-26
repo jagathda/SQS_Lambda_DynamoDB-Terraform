@@ -73,3 +73,8 @@ resource "aws_iam_role_policy_attachment" "lambda_policy_attachment" {
   role       = aws_iam_role.lambda_role.name
   policy_arn = aws_iam_policy.lambda_dynamodb_policy.arn
 }
+
+//SQS queue
+resource "aws_sqs_queue" "my_queue" {
+  name = "my-queue"
+}
