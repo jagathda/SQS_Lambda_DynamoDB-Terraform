@@ -95,14 +95,6 @@ resource "aws_lambda_function" "my_lambda" {
   }
 }
 
-/*
-//Lambda event source mapping
-resource "aws_lambda_event_source_mapping" "sqs_to_lambda" {
-  event_source_arn = aws_sqs_queue.my_queue.arn
-  function_name    = aws_lambda_function.my_lambda.arn
-  enabled          = true
-}*/
-
 //SQS permission to IAM policy
 resource "aws_iam_policy" "lambda_sqs_dynamodb_policy" {
   name        = "LambdaSQSDynamoDBAccessPolicy"
@@ -158,4 +150,11 @@ resource "aws_iam_policy" "lambda_sqs_policy" {
 resource "aws_iam_role_policy_attachment" "lambda_sqs_policy_attachment" {
   role       = aws_iam_role.lambda_role.name
   policy_arn = aws_iam_policy.lambda_sqs_policy.arn
+}
+
+//Lambda event source mapping
+resource "aws_lambda_event_source_mapping" "sqs_to_lambda" {
+  event_source_arn = aws_sqs_queue.my_queue.arn
+  function_name    = aws_lambda_function.my_lambda.arn
+  enabled          = true
 }
