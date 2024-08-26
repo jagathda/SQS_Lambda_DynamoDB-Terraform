@@ -67,3 +67,9 @@ resource "aws_iam_policy" "lambda_dynamodb_policy" {
     ]
   })
 }
+
+//Attach policy to role
+resource "aws_iam_role_policy_attachment" "lambda_policy_attachment" {
+  role       = aws_iam_role.lambda_role.name
+  policy_arn = aws_iam_policy.lambda_dynamodb_policy.arn
+}
