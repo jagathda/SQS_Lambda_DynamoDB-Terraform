@@ -46,7 +46,7 @@ resource "aws_dynamodb_table" "my_table" {
   }
 }
 
-//IAM policy
+//IAM DynamoDB policy
 resource "aws_iam_policy" "lambda_dynamodb_policy" {
   name        = "LambdaDynamoDBAccessPolicy"
   description = "Policy allowing Lambda to access DynamoDB"
@@ -68,8 +68,8 @@ resource "aws_iam_policy" "lambda_dynamodb_policy" {
   })
 }
 
-//Attach policy to role
-resource "aws_iam_role_policy_attachment" "lambda_policy_attachment" {
+//Attach DynamoDB policy to role
+resource "aws_iam_role_policy_attachment" "lambda_dynamodb_policy_attachment" {
   role       = aws_iam_role.lambda_role.name
   policy_arn = aws_iam_policy.lambda_dynamodb_policy.arn
 }
@@ -132,4 +132,30 @@ resource "aws_iam_policy" "lambda_sqs_dynamodb_policy" {
       }
     ]
   })
+}
+
+//IAM SQS policy
+resource "aws_iam_policy" "lambda_sqs_policy" {
+  name        = "LambdaSQSAccessPolicy"
+  description = "Policy allowing Lambda to access SQS"
+  policy      = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect = "Allow",
+        Action = [
+          "sqs:ReceiveMessage",
+          "sqs:DeleteMessage",
+          "sqs:GetQueueAttributes"
+        ],
+        Resource = aws_sqs_queue.my_queue.arn
+      }
+    ]
+  })
+}
+
+//Attach SQS policy to role
+resource "aws_iam_role_policy_attachment" "lambda_sqs_policy_attachment" {
+  role       = aws_iam_role.lambda_role.name
+  policy_arn = aws_iam_policy.lambda_sqs_policy.arn
 }
