@@ -1,24 +1,30 @@
 const AWS = require('aws-sdk');
-const dynamoDb = new AWS.DynamoDB.DocumentClient();
+const dynamo = new AWS.DynamoDB.DocumentClient();
 
-exports.handler = async function(event) {
-  console.log("Received event:", JSON.stringify(event, null, 2));
+exports.handler = async (event) => {
+    for (const record of event.Records) {
+        const body = JSON.parse(record.body);
+        console.log("Received message body:", body);
 
-  for (const record of event.Records) {
-    const messageBody = JSON.parse(record.body);
-    const params = {
-      TableName: process.env.TABLE_NAME,
-      Item: {
-        id: messageBody.id,
-        data: messageBody.data,
-      },
-    };
+        if (body.key && body.key.id) {
+            const id = body.key.id;
 
-    try {
-      await dynamoDb.put(params).promise();
-      console.log(`Successfully inserted item with id: ${messageBody.id}`);
-    } catch (err) {
-      console.error(`Failed to insert item with id: ${messageBody.id}`, err);
+            const params = {
+                TableName: process.env.TABLE_NAME,
+                Item: {
+                    id: id,
+                    // You can add other attributes here if needed
+                }
+            };
+
+            try {
+                await dynamo.put(params).promise();
+                console.log(`Successfully inserted item with id: ${id}`);
+            } catch (error) {
+                console.error(`Failed to insert item with id: ${id}`, error);
+            }
+        } else {
+            console.error('Invalid message body, missing key.id:', body);
+        }
     }
-  }
 };
