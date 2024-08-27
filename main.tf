@@ -85,7 +85,7 @@ resource "aws_lambda_function" "my_lambda" {
   function_name    = "my_lambda_function"
   role             = aws_iam_role.lambda_role.arn
   handler          = "index.handler"
-  runtime          = "nodejs20.x"
+  runtime          = "nodejs16.x"
   source_code_hash = filebase64sha256("lambda_function.zip")  # Ensures Lambda updates when the code changes
 
   environment {
@@ -157,4 +157,11 @@ resource "aws_lambda_event_source_mapping" "sqs_to_lambda" {
   event_source_arn = aws_sqs_queue.my_queue.arn
   function_name    = aws_lambda_function.my_lambda.arn
   enabled          = true
+}
+
+// Attach AWSLambdaBasicExecutionRole managed policy to role
+// Lambda function to write logs to Amazon CloudWatch
+resource "aws_iam_role_policy_attachment" "lambda_basic_execution_role_attachment" {
+  role       = aws_iam_role.lambda_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
