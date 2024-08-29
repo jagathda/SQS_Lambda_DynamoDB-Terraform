@@ -13,7 +13,7 @@ exports.handler = async (event) => {
                 TableName: process.env.TABLE_NAME,
                 Item: {
                     id: id,
-                    // You can add other attributes here if needed
+                    //other attributes here if needed
                 }
             };
 

@@ -46,34 +46,6 @@ resource "aws_dynamodb_table" "my_table" {
   }
 }
 
-//IAM DynamoDB policy
-resource "aws_iam_policy" "lambda_dynamodb_policy" {
-  name        = "LambdaDynamoDBAccessPolicy"
-  description = "Policy allowing Lambda to access DynamoDB"
-  policy      = jsonencode({
-    Version = "2012-10-17",
-    Statement = [
-      {
-        Effect = "Allow",
-        Action = [
-          "dynamodb:PutItem",
-          "dynamodb:GetItem",
-          "dynamodb:UpdateItem",
-          "dynamodb:Query",
-          "dynamodb:Scan"
-        ],
-        Resource = aws_dynamodb_table.my_table.arn
-      }
-    ]
-  })
-}
-
-//Attach DynamoDB policy to role
-resource "aws_iam_role_policy_attachment" "lambda_dynamodb_policy_attachment" {
-  role       = aws_iam_role.lambda_role.name
-  policy_arn = aws_iam_policy.lambda_dynamodb_policy.arn
-}
-
 //SQS queue
 resource "aws_sqs_queue" "my_queue" {
   name = "my-queue"
@@ -126,32 +98,6 @@ resource "aws_iam_policy" "lambda_sqs_dynamodb_policy" {
   })
 }
 
-//IAM SQS policy
-resource "aws_iam_policy" "lambda_sqs_policy" {
-  name        = "LambdaSQSAccessPolicy"
-  description = "Policy allowing Lambda to access SQS"
-  policy      = jsonencode({
-    Version = "2012-10-17",
-    Statement = [
-      {
-        Effect = "Allow",
-        Action = [
-          "sqs:ReceiveMessage",
-          "sqs:DeleteMessage",
-          "sqs:GetQueueAttributes"
-        ],
-        Resource = aws_sqs_queue.my_queue.arn
-      }
-    ]
-  })
-}
-
-//Attach SQS policy to role
-resource "aws_iam_role_policy_attachment" "lambda_sqs_policy_attachment" {
-  role       = aws_iam_role.lambda_role.name
-  policy_arn = aws_iam_policy.lambda_sqs_policy.arn
-}
-
 //Lambda event source mapping
 resource "aws_lambda_event_source_mapping" "sqs_to_lambda" {
   event_source_arn = aws_sqs_queue.my_queue.arn
@@ -164,4 +110,10 @@ resource "aws_lambda_event_source_mapping" "sqs_to_lambda" {
 resource "aws_iam_role_policy_attachment" "lambda_basic_execution_role_attachment" {
   role       = aws_iam_role.lambda_role.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+}
+
+//Attach the combined policy to the role
+resource "aws_iam_role_policy_attachment" "lambda_sqs_dynamodb_policy" {
+  role       = aws_iam_role.lambda_role.name
+  policy_arn = aws_iam_policy.lambda_combined_policy.arn
 }
